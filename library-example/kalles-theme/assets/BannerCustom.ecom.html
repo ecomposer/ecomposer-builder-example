@@ -1,7 +1,10 @@
 <template>
+  <div>
   <div
-    class="ecom-kalles-banner-custom"
-    data-ecom-isotope='{ "itemSelector": ".ecom-kalles-banner-custom__item", "layoutMode": "masonry"}'
+    class="ecom-kalles-banner-custom row"
+    :class="{'hoverz_true': data?.settings?.image_hover_zoom}"
+    ref="ecom-kalles-banner-custom"
+    data-ecom-packery='{ "itemSelector": ".ecom-kalles-banner-custom__item", "layoutMode": "packery"}'
     v-if="data?.settings?.items?.length > 0"
   >
     <div
@@ -29,40 +32,41 @@
             class="ecom-kalles-banner-custom__picture"
           />
         </a>
-      </div>
-      <div
-        class="nt_promotion_html pa t__0 l__0 r__0 b__0 flex w__100 pa_txts pe_none z_100"
-        :style="vertical_style(item)"
-      >
         <div
-          class="ecom-kalles-banner-custom_wrap_html_block"
-          :style="banner_style(item)"
+          class="nt_promotion_html pa t__0 l__0 r__0 b__0 flex w__100 pa_txts pe_none z_100"
+          :style="vertical_style(item)"
         >
-          <h3
-            v-if="item?.content?.heading"
-            class="ecom-kalles-banner-custom__heading"
-            v-html="item.content.heading"
-          />
-          <h3
-            v-if="item?.content?.subheading"
-            class="ecom-kalles-banner-custom__subheading"
-            v-html="item.content.subheading"
-          />
-          <p
-            v-if="item?.content?.content"
-            class="ecom-kalles-banner-custom__content"
-            v-html="item.content.content"
-          />
-          <a
-            v-if="item?.button?.link?.href"
-            class="ecom-kalles-banner-custom__button"
-            :href="item.button.link.href"
-            v-bind="attrLink(item)"
-            v-html="item.button?.content"
-          />
-        </div> <!-- wrap_html_block -->
-      </div> <!-- nt_promotion_html -->
+          <div
+            class="ecom-kalles-banner-custom_wrap_html_block"
+            :style="banner_style(item)"
+          >
+            <h3
+              v-if="item?.content?.heading"
+              class="ecom-kalles-banner-custom__heading"
+              v-html="item.content.heading"
+            />
+            <h3
+              v-if="item?.content?.subheading"
+              class="ecom-kalles-banner-custom__subheading"
+              v-html="item.content.subheading"
+            />
+            <p
+              v-if="item?.content?.content"
+              class="ecom-kalles-banner-custom__content"
+              v-html="item.content.content"
+            />
+            <a
+              v-if="item?.button?.link?.href"
+              class="ecom-kalles-banner-custom__button pe_auto"
+              :href="item.button.link.href"
+              v-bind="attrLink(item)"
+              v-html="item.button?.content"
+            />
+          </div> <!-- wrap_html_block -->
+        </div> <!-- nt_promotion_html -->
+      </div>
     </div>
+  </div>
   </div>
 </template>
 <script>
@@ -88,17 +92,78 @@ export default {
           return function(){
               const $el = this.$el;
               if(!$el) return;
-              var initIsotope = function() {
-                if(window.Isotope && window.jQuery) {
-                  var refresh_isotope = function(el) {
-                    var option = el.getAttribute("data-ecom-isotope") || '{}';
-                    console.log(JSON.parse(option));
-                    window.jQuery(el).isotope(JSON.parse(option));
-                  }
-                  refresh_isotope($el)
+				      //Overwrite method check instanceOf HTMLElement
+           		// Only work in Editor
+              if(window.Isotope && window.ECOM_LIVE){
+                   window.fizzyUIUtils.filterFindElements = function( elems, selector ) {
+                      // make array of elems
+                      elems = window.fizzyUIUtils.makeArray( elems );
+                      var ffElems = [];
+
+                      elems.forEach( function( elem ) {
+                        // check that elem is an actual element
+                        if ( !( elem instanceof HTMLElement ) ) {
+  //                         return;
+                        }
+                        // add elem if no selector
+                        if ( !selector ) {
+                          ffElems.push( elem );
+                          return;
+                        }
+                        // filter & find items if we have a selector
+                        // filter
+                        if ( matchesSelector( elem, selector ) ) {
+                          ffElems.push( elem );
+                        }
+                        // find children
+                        var childElems = elem.querySelectorAll( selector );
+                        // concat childElems to filterFound array
+                        for ( var i=0; i < childElems.length; i++ ) {
+                          ffElems.push( childElems[i] );
+                        }
+                      });
+
+                      return ffElems;
+                    };
+                      Isotope.prototype._filterFindItemElements = function( elems ) {
+                        return  window.fizzyUIUtils.filterFindElements( elems, this.options.itemSelector );
+                      };
+                      Isotope.prototype._getMeasurement = function( measurement, size ) {
+                      var option = this.options[ measurement ];
+                      var elem;
+                      if ( !option ) {
+                        // default to 0
+                        this[ measurement ] = 0;
+                      } else {
+                        // use option as an element
+                        if ( typeof option == 'string' ) {
+                          elem = this.element.querySelector( option );
+                        } else if ( typeof option  === 'object' ) {
+                          elem = option;
+                        }
+                        // use size of element, if element
+                        this[ measurement ] = elem ? window.getSize( elem )[ size ] : option;
+                      }
+                    };
+                    const banner_wrapper = $el.querySelector('.ecom-kalles-banner-custom');
+                    if(banner_wrapper) {
+                      banner_wrapper.addEventListener('itemChange', function(e){
+                        setTimeout(initPackery, 500);
+                      });
+                    }
+              }
+
+              //initIsotope();
+              const initPackery = function() {
+                let dom = $el.querySelector('.ecom-kalles-banner-custom');
+                if(!dom) return;
+
+                var option = dom.getAttribute("data-ecom-isotope") || '{}';
+                if(window.Packery){
+                  jQuery(dom).packery(JSON.parse(option));
                 }
               }
-              setTimeout(initIsotope(), 2000);
+              initPackery();
           }
       },
       default() {
@@ -307,6 +372,30 @@ export default {
                       ]
                     }
                   ]
+              },
+              {
+                group_title: 'Settings',
+                params: [
+                  {
+                    type: 'toggle',
+                    label: 'Enable zoom image on hover?',
+                    name: 'image_hover_zoom',
+                    value: true,
+                    options: {
+                        values:{
+                            on:{
+                                label: 'Yes',
+                                value: true
+                            },
+                            off: {
+                                label: 'No',
+                                value: false
+                            }
+                        }
+                    }
+
+                  }
+                ]
               }
           ]
       },
@@ -319,6 +408,22 @@ export default {
         return `
         .ecom-kalles-banner-custom__button {
           text-decoration: none;
+        }
+        .ecom-kalles-banner-custom .cat_space_item {
+          padding-left: 5px;
+          padding-right: 5px;
+        }
+        .hoverz_true .nt_promotion:hover>img {
+            transform: scale(1.11);
+            -webkit-transform: scale(1.11);
+            -o-transform: scale(1.11);
+            -moz-transform: scale(1.11);
+        }
+        .hoverz_true .nt_promotion>img {
+            -webkit-transition: .6s ease-in-out;
+            -moz-transition: .6s ease-in-out;
+            -o-transition: .6s ease-in-out;
+            transition: .6s ease-in-out;
         }
         `;
       }
@@ -345,8 +450,8 @@ export default {
     banner_width(item){
       return [
         item.banner_width ? 'col-lg-' + item.banner_width : 'col-12',
-        item.banner_width__table ? 'col-md-' +  item.banner_width__table : 'col-md-12',
-        item.banner_width__mobile ? 'col-' +  item.banner_width__mobile : ''
+        item.banner_width__tablet ? 'col-md-' +  item.banner_width__tablet : '',
+        item.banner_width__mobile ? 'col-' +  item.banner_width__mobile : 'col-12'
       ];
     },
     attrLink(item) {
@@ -387,9 +492,7 @@ export default {
         {
           group_title: 'General',
           group_name: 'general',
-          option: {
-            selector: ' .ecom-kalles-banner-custom__item'
-          },
+          selector: ' .ecom-kalles-banner-custom__item',
           params: [
             {
               alias:'spacing'
@@ -403,6 +506,18 @@ export default {
             group_name: 'heading',
             selector: ' .ecom-kalles-banner-custom__heading'
           },
+          modify: {
+            params: [
+              {
+                position: 5,
+                fields: [
+                  {
+                    alias:'spacing'
+                  }
+                ]
+              }
+            ]
+          }
         },
         {
           group_alias: 'text',
@@ -411,6 +526,18 @@ export default {
             group_name: 'subheading',
             selector: ' .ecom-kalles-banner-custom__subheading'
           },
+          modify: {
+            params: [
+              {
+                position: 5,
+                fields: [
+                  {
+                    alias:'spacing'
+                  }
+                ]
+              }
+            ]
+          }
         },
         {
           group_alias: 'text',
@@ -419,6 +546,18 @@ export default {
             group_name: 'content',
             selector: ' .ecom-kalles-banner-custom__content'
           },
+          modify: {
+            params: [
+              {
+                position: 5,
+                fields: [
+                  {
+                    alias:'spacing'
+                  }
+                ]
+              }
+            ]
+          }
         },
         {
           group_alias: 'button',
@@ -427,10 +566,33 @@ export default {
             group_name: 'button',
             selector: ' .ecom-kalles-banner-custom__button'
           },
+          modify: {
+            params: [
+              {
+                position: 5,
+                fields: [
+                  {
+                    alias:'spacing'
+                  }
+                ]
+              }
+            ]
+          }
         }
       ]
     },
   },
-
+  watch:{
+    'data.settings.items':  {
+      deep:true,
+        immediate: true,
+        handler: function(){
+        	let wrapper = this.$refs['ecom-kalles-banner-custom'];
+          if(wrapper) {
+            wrapper.dispatchEvent(new Event('itemChange'));
+          }
+        }
+    }
+  }
 }
 </script>

@@ -1,0 +1,232 @@
+<template>
+  <div
+      ref="wrapper"
+      class="ecom__element element__heading ecom-element ecom-html wrap_title"
+      :class="['des_' + data?.settings?.style]"
+      :data-stopdrag="editing ? 'true' : null"
+  >
+      <component
+          :is="data?.settings?.tag ?? 'h2'"
+          v-if="data.settings?.link && data.settings?.link.href"
+          class="ecom__heading section-title tc pr flex fl_center al_center fs__24"
+          :class="[data?.settings?.style, data?.settings?.style == 'title_5' ? 'lazyloadt4sed' : '']"
+      >
+          <a
+              v-bind="data.settings?.link"
+          >
+          <span
+            class="mr__10 ml__10"
+            ref="content"
+            :contenteditable="isFullScreen ? null : true"
+            spellcheck="false"
+            @click="edit"
+            @keyup="update"
+            @blur="editing=false"
+            v-html="lang(data.settings?.content)"
+          />
+          </a>
+      </component>
+      <component
+          :is="data?.settings?.tag ?? 'h2'"
+          v-else
+          ref="content"
+          class="ecom__heading section-title tc pr flex fl_center al_center fs__24"
+          :class="[data?.settings?.style, data?.settings?.style == 'title_5' ? 'lazyloadt4sed' : '']"
+      >
+      <span
+        class="mr__10 ml__10"
+        ref="content"
+        :contenteditable="isFullScreen ? null : true"
+        spellcheck="false"
+        @click="edit"
+        @keyup="update"
+        @blur="editing=false"
+        v-html="editing ? editingValue : lang(data.settings?.content)"
+      />
+      </component>
+      <span class="dn tt_divider">
+        <span></span>
+          <i
+              class="ecom__element--button-icon dn clprfalse"
+              :class="data?.settings?.style"
+              v-html="data.settings?.icon"
+          />
+        <span></span>
+      </span>
+      <span
+        class="section-subtitle db tc sub-title"
+        v-html="lang(data.settings?.sub_content)"
+      />
+  </div>
+</template>
+<script>
+export default {
+  name: "Kalles Heading",
+  props: {
+      data: {
+          type: Object,
+          default() {
+              return {};
+          }
+      }
+  },
+  data () {
+      return {
+          editing: false,
+          is: 'heading',
+          editingValue: ''
+      };
+  },
+  computed: {
+      settings () {
+          return [
+              {
+                  params: [
+                      {
+                          type: 'textarea',
+                          label: 'Heading text',
+                          name: 'content',
+                          options: {
+                              toolbar: 'short',
+                              height: 80
+                          }
+                      },
+
+                      {
+                          type: 'link',
+                          label: 'Insert Link',
+                          name: 'link'
+                      },
+                      {
+                          type: 'choose',
+                          label: '<span class="uppercase">HTML</span> Tag',
+                          name: 'tag',
+                          options: {
+                              type: 'heading'
+                          }
+                      },
+                      {
+                        type: 'line'
+                      },
+                      {
+                          type: 'textarea',
+                          label: 'Sub heading text',
+                          name: 'sub_content',
+                          options: {
+                              toolbar: 'short',
+                              height: 80
+                          }
+                      },
+                      {
+                        type: 'line'
+                      },
+                      {
+                          name: 'style',
+                          type: 'dropdown',
+                          label: 'Heading style',
+                          value:'title_2',
+                          options: {
+                              default: false,
+                              values: {
+                                'title_1': 'Style 1',
+                                'title_2': 'Style 2',
+                                'title_3': 'Style 3',
+                                'title_4': 'Style 4',
+                                'title_5': 'Style 5',
+                                'title_6': 'Style 6',
+                                'title_7': 'Style 7',
+                                'title_8': 'Style 8',
+                                'title_9': 'Style 9',
+                                'title_11': 'Style 10',
+                                'title_12': 'Style 11',
+                                'title_13': 'Style 12',
+                              }
+                          }
+                        },
+                        {
+                            type: 'picker',
+                            label: 'Icon',
+                            name: 'icon',
+                            options: {
+                                type: 'icon',
+                                layout: 'grid',
+                                output: 'value',
+                                multiple: false,
+                                simple: false,
+                                visible: {
+                                    keep_data: false,
+                                    condition: (data) => {
+                                        return data['style'] == 'title_7';
+                                    }
+                                }
+                            }
+                        },
+                  ]
+              }
+          ];
+      },
+
+      style () {
+          return [
+              {
+                  group_alias:'text',
+                  options: {
+                      selector: ' .element__heading .ecom__heading'
+                  }
+              }
+          ];
+      },
+
+      heading () {
+          return this.data;
+      },
+
+      activeMe () {
+          return (this.editingElement?.data?.id ?? 0) === this.heading.id;
+      },
+
+      default() {
+          return {
+              settings: {
+                  content: "Enter your heading",
+                  tag: "h2"
+              },
+              style: {
+                  text: {
+                      textTextAlign: "left"
+                  }
+              }
+          }
+      },
+      css() {
+        return `.ecom__element--button-icon svg{width: 20px; height: auto}`;
+      }
+
+  },
+  watch: {
+      activeMe (val) {
+          if (!val && this.editing === true) {
+              this.editing = false;
+              this.heading.settings.content = this.$refs.content.innerHTML;
+          }
+      }
+  },
+  methods: {
+      edit() {
+          if (this.editing === false) {
+              this.editing = true;
+              this.editingValue = this.data.settings.content;
+          }
+      },
+      update(e) {
+          if (
+              this.editing
+          ) {
+              this.heading.settings.content = e.target.innerHTML;
+          }
+      },
+
+  }
+
+}
+</script>

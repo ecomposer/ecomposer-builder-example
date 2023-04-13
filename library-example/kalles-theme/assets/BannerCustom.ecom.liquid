@@ -1,0 +1,598 @@
+<template>
+  <div>
+  <div
+    class="ecom-kalles-banner-custom row"
+    :class="{'hoverz_true': data?.settings?.image_hover_zoom}"
+    ref="ecom-kalles-banner-custom"
+    data-ecom-packery='{ "itemSelector": ".ecom-kalles-banner-custom__item", "layoutMode": "packery"}'
+    v-if="data?.settings?.items?.length > 0"
+  >
+    <div
+      v-for="(item, index) in data.settings.items"
+      :v-key="index"
+      class="ecom-kalles-banner-custom__item cat_space_item pr_animated"
+      :class="banner_width(item)"
+    >
+      <div class="banner_hzoom nt_promotion oh pr">
+        <img
+          v-if="!item?.image?.image_link?.href && item?.image?.image?.value"
+          :src="item?.image.image.value"
+          :alt="item.image.image?.name"
+          class="ecom-kalles-banner-custom__image-picture"
+        />
+        <a
+          v-else-if="item?.image?.image_link?.href && item?.image?.image?.value"
+          :href="item.image.image_link.href"
+          :target="item.image.image_link?.target"
+          class="ecom-kalles-banner-custom__picture-link"
+        >
+          <img
+            :src="item.image.image.value"
+            :alt="item.image.image?.name"
+            class="ecom-kalles-banner-custom__picture"
+          />
+        </a>
+        <div
+          class="nt_promotion_html pa t__0 l__0 r__0 b__0 flex w__100 pa_txts pe_none z_100"
+          :style="vertical_style(item)"
+        >
+          <div
+            class="ecom-kalles-banner-custom_wrap_html_block"
+            :style="banner_style(item)"
+          >
+            <h3
+              v-if="item?.content?.heading"
+              class="ecom-kalles-banner-custom__heading"
+              v-html="item.content.heading"
+            />
+            <h3
+              v-if="item?.content?.subheading"
+              class="ecom-kalles-banner-custom__subheading"
+              v-html="item.content.subheading"
+            />
+            <p
+              v-if="item?.content?.content"
+              class="ecom-kalles-banner-custom__content"
+              v-html="item.content.content"
+            />
+            <a
+              v-if="item?.button?.link?.href"
+              class="ecom-kalles-banner-custom__button pe_auto"
+              :href="item.button.link.href"
+              v-bind="attrLink(item)"
+              v-html="item.button?.content"
+            />
+          </div> <!-- wrap_html_block -->
+        </div> <!-- nt_promotion_html -->
+      </div>
+    </div>
+  </div>
+  </div>
+</template>
+<script>
+export default {
+  name: "Banner Custom",
+  props: {
+      data: {
+          type: Object,
+          default() {
+              return {};
+          }
+      }
+  },
+  data(){
+        return {
+            jsreactives: [
+                'items'
+            ]
+        }
+    },
+  computed: {
+      javascript(){
+          return function(){
+              const $el = this.$el;
+              if(!$el) return;
+				      //Overwrite method check instanceOf HTMLElement
+           		// Only work in Editor
+              if(window.Isotope && window.ECOM_LIVE){
+                   window.fizzyUIUtils.filterFindElements = function( elems, selector ) {
+                      // make array of elems
+                      elems = window.fizzyUIUtils.makeArray( elems );
+                      var ffElems = [];
+
+                      elems.forEach( function( elem ) {
+                        // check that elem is an actual element
+                        if ( !( elem instanceof HTMLElement ) ) {
+  //                         return;
+                        }
+                        // add elem if no selector
+                        if ( !selector ) {
+                          ffElems.push( elem );
+                          return;
+                        }
+                        // filter & find items if we have a selector
+                        // filter
+                        if ( matchesSelector( elem, selector ) ) {
+                          ffElems.push( elem );
+                        }
+                        // find children
+                        var childElems = elem.querySelectorAll( selector );
+                        // concat childElems to filterFound array
+                        for ( var i=0; i < childElems.length; i++ ) {
+                          ffElems.push( childElems[i] );
+                        }
+                      });
+
+                      return ffElems;
+                    };
+                      Isotope.prototype._filterFindItemElements = function( elems ) {
+                        return  window.fizzyUIUtils.filterFindElements( elems, this.options.itemSelector );
+                      };
+                      Isotope.prototype._getMeasurement = function( measurement, size ) {
+                      var option = this.options[ measurement ];
+                      var elem;
+                      if ( !option ) {
+                        // default to 0
+                        this[ measurement ] = 0;
+                      } else {
+                        // use option as an element
+                        if ( typeof option == 'string' ) {
+                          elem = this.element.querySelector( option );
+                        } else if ( typeof option  === 'object' ) {
+                          elem = option;
+                        }
+                        // use size of element, if element
+                        this[ measurement ] = elem ? window.getSize( elem )[ size ] : option;
+                      }
+                    };
+                    const banner_wrapper = $el.querySelector('.ecom-kalles-banner-custom');
+                    if(banner_wrapper) {
+                      banner_wrapper.addEventListener('itemChange', function(e){
+                        setTimeout(initPackery, 500);
+                      });
+                    }
+              }
+
+              //initIsotope();
+              const initPackery = function() {
+                let dom = $el.querySelector('.ecom-kalles-banner-custom');
+                if(!dom) return;
+
+                var option = dom.getAttribute("data-ecom-isotope") || '{}';
+                if(window.Packery){
+                  jQuery(dom).packery(JSON.parse(option));
+                }
+              }
+              initPackery();
+          }
+      },
+      default() {
+        return {
+          settings: {
+            items: [
+              {
+                name: 'Banner',
+                banner_width: 6,
+              }
+            ]
+          },
+          style: {
+            button: {
+              buttonBackgroundnormalmode: {
+                classic: {
+                    "background-color": "rgba(5, 150, 105, 0.8)"
+                }
+              },
+              buttonColornormalmode: '#000',
+              spacing: {
+                  padding: {
+                      bottom: "10px",
+                      top: "10px",
+                      left: "24px",
+                      right: "24px"
+                  },
+                  margin: {}
+              }
+            }
+          }
+        }
+      },
+      settings(){
+          return [
+              {
+                  group_title: 'Banner items',
+                  params: [
+                    {
+                      name: "items",
+                      type: "group",
+                      value: [],
+                      options: {
+                          add_text: "Add banner",
+                          is_clear_all: false
+                      },
+                      params: [
+                        {
+                            type: 'text',
+                            label: 'Banner name',
+                            name: 'name'
+                        },
+                        {
+                          name: 'banner_width',
+                          type: 'dropdown',
+                          label: 'Banner Width',
+                          value:6,
+                          options: {
+                              default: false,
+                              responsive: true,
+                              values: {
+                                12: '100%',
+                                8: '66.6%',
+                                7: '58.3%',
+                                6: '50%',
+                                5: '41.6%',
+                                4: '33.3%',
+                                3: '25%',
+                                2: '20%',
+                                1: '16.6%',
+                              }
+                          }
+                        },
+                        {
+                          type: 'choose',
+                          label: 'Content Aligntment',
+                          name: 'content_alignment',
+                          value: '',
+                          options: {
+                            type: 'text-align',
+                            values: [
+                                "left",
+                                "center",
+                                "right"
+                            ]
+                          },
+                          css:{
+                              selector:'',
+                              properties:{
+                                  'text-align':''
+                              }
+                          }
+                        },
+                        {
+                          type: 'choose',
+                          label: 'Horizontal Position',
+                          name: 'horizontal',
+                          value: '',
+                          options: {
+                            type: 'align-x-full',
+                            values: [
+                                "left",
+                                "center",
+                                "right"
+                            ]
+                          },
+                          css:{
+                            isCss: false
+                          }
+                        },
+                        {
+                          type: 'choose',
+                          label: 'Vertical Position',
+                          name: 'vertical',
+                          value: '',
+                          options: {
+                            type: 'align-y-full',
+                            values: [
+                                "flex-start",
+                                "center",
+                                "flex-end"
+                            ]
+                          },
+                          css:{
+                            isCss: false
+                          }
+                        },
+                        // {
+                        //   alias:'spacing',
+                        //   options:{
+                        //       css:{
+                        //           selector:''
+                        //       }
+                        //   }
+                        // },
+                        {
+                          group_name:'image',
+                          group_title: 'Image',
+                          params: [
+                            {
+                              type: 'picker',
+                              label: 'Choose Image',
+                              name: 'image',
+                              options: {
+                                  responsive: false,
+                                  type: 'image',
+                                  editAlt: true
+                              }
+                            },
+                            {
+                              type: 'link',
+                              label: 'Image link',
+                              name: 'image_link'
+                            }
+                          ]
+                        },
+                        {
+                          group_name: 'content',
+                          group_title: 'Content',
+                          params: [
+                              {
+                              type: "textarea",
+                              label: "Heading",
+                              name: "heading",
+                              options: {
+                                  toolbar: true
+                              }
+                            },
+                            {
+                              type: "textarea",
+                              label: "Sub Heading",
+                              name: "subheading",
+                              options: {
+                                  toolbar: true
+                              }
+                            },
+                            {
+                              type: "textarea",
+                              label: "Content",
+                              name: "content",
+                              options: {
+                                  toolbar: true
+                              }
+                            },
+                          ]
+                        },
+                        {
+                          group_alias:'button:settings',
+                          options:{
+                              group_name:'button',
+                              group_title:'Button'
+                          },
+                          modify: {
+                            remove: [
+                                {
+                                    index: 3,
+                                    length: 1,
+                                }
+                            ],
+                          }
+                        },
+                        {
+                          type:"line"
+                        },
+
+                      ]
+                    }
+                  ]
+              },
+              {
+                group_title: 'Settings',
+                params: [
+                  {
+                    type: 'toggle',
+                    label: 'Enable zoom image on hover?',
+                    name: 'image_hover_zoom',
+                    value: true,
+                    options: {
+                        values:{
+                            on:{
+                                label: 'Yes',
+                                value: true
+                            },
+                            off: {
+                                label: 'No',
+                                value: false
+                            }
+                        }
+                    }
+
+                  }
+                ]
+              }
+          ]
+      },
+      liquids(){
+          return {
+
+          }
+      },
+      css(){
+        return `
+        .ecom-kalles-banner-custom__button {
+          text-decoration: none;
+        }
+        .ecom-kalles-banner-custom .cat_space_item {
+          padding-left: 5px;
+          padding-right: 5px;
+        }
+        .hoverz_true .nt_promotion:hover>img {
+            transform: scale(1.11);
+            -webkit-transform: scale(1.11);
+            -o-transform: scale(1.11);
+            -moz-transform: scale(1.11);
+        }
+        .hoverz_true .nt_promotion>img {
+            -webkit-transition: .6s ease-in-out;
+            -moz-transition: .6s ease-in-out;
+            -o-transition: .6s ease-in-out;
+            transition: .6s ease-in-out;
+        }
+        `;
+      }
+  },
+  mounted() {
+      if(!this.data?.settings)
+      {
+          this.data.settings = {
+            button: {
+                titleAlignment: "center",
+                spacing: {
+                    padding: {
+                        top: "5px",
+                        bottom: "5px",
+                        left: "12px",
+                        right: "12px"
+                    }
+                }
+            },
+          }
+      }
+  },
+  methods: {
+    banner_width(item){
+      return [
+        item.banner_width ? 'col-lg-' + item.banner_width : 'col-12',
+        item.banner_width__tablet ? 'col-md-' +  item.banner_width__tablet : '',
+        item.banner_width__mobile ? 'col-' +  item.banner_width__mobile : 'col-12'
+      ];
+    },
+    attrLink(item) {
+      return item.button?.link;
+    },
+    banner_style(item) {
+      let style = {};
+      if(item.horizontal) {
+        let  horizontal_val = '';
+        switch( item.horizontal ) {
+          case 'left':
+            horizontal_val = '0 auto 0 0';
+            break;
+          case 'center':
+            horizontal_val = '0 auto';
+            break;
+          case 'right':
+            horizontal_val = '0 0 0 auto';
+            break;
+        }
+        style.margin = horizontal_val
+      }
+      if(item.content_alignment) {
+        style.textAlign = item.content_alignment
+      }
+
+      return style;
+    },
+    vertical_style(item) {
+      let style = {};
+      if(item.vertical) {
+        style.alignItems = item.vertical;
+      }
+      return style;
+    },
+    style(){
+      return [
+        {
+          group_title: 'General',
+          group_name: 'general',
+          selector: ' .ecom-kalles-banner-custom__item',
+          params: [
+            {
+              alias:'spacing'
+            }
+          ]
+        },
+        {
+          group_alias: 'text',
+          options:{
+            group_title: 'Heading',
+            group_name: 'heading',
+            selector: ' .ecom-kalles-banner-custom__heading'
+          },
+          modify: {
+            params: [
+              {
+                position: 5,
+                fields: [
+                  {
+                    alias:'spacing'
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          group_alias: 'text',
+          options:{
+            group_title: 'Sub Heading',
+            group_name: 'subheading',
+            selector: ' .ecom-kalles-banner-custom__subheading'
+          },
+          modify: {
+            params: [
+              {
+                position: 5,
+                fields: [
+                  {
+                    alias:'spacing'
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          group_alias: 'text',
+          options:{
+            group_title: 'Content',
+            group_name: 'content',
+            selector: ' .ecom-kalles-banner-custom__content'
+          },
+          modify: {
+            params: [
+              {
+                position: 5,
+                fields: [
+                  {
+                    alias:'spacing'
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          group_alias: 'button',
+          options:{
+            group_title: 'Button',
+            group_name: 'button',
+            selector: ' .ecom-kalles-banner-custom__button'
+          },
+          modify: {
+            params: [
+              {
+                position: 5,
+                fields: [
+                  {
+                    alias:'spacing'
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+  },
+  watch:{
+    'data.settings.items':  {
+      deep:true,
+        immediate: true,
+        handler: function(){
+        	let wrapper = this.$refs['ecom-kalles-banner-custom'];
+          if(wrapper) {
+            wrapper.dispatchEvent(new Event('itemChange'));
+          }
+        }
+    }
+  }
+}
+</script>

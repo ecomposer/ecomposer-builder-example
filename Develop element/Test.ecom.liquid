@@ -5,7 +5,7 @@
             Lorem ipsum dolor, sit amet consectetur adipisicing elit. Minus molestiae ea neque, a alias dicta beatae reprehenderit necessitatibus asperiores ipsa nesciunt optio qui tempore animi enim sint! Quos, placeat similique!
         </p>
         <h3 v-html="liquid('setting_title')"></h3>
-        <component :is="'script'" class="beae-data" type="application/json"  v-html="liquid('settings')" /> 
+        <component :is="'script'" class="ecomposer-data" type="application/json"  v-html="liquid('settings')" /> 
     </div>
 </template>
 <script>
@@ -32,11 +32,11 @@ export default {
         liquids(){
             return {
                 settings: {
-                    code: `{{shop.metafields.beae.my-app.value | json}}`,
+                    code: `{{shop.metafields.ecomposer.my-app.value | json}}`,
                     preview:''
                 },
                 setting_title:{
-                    code: `{{shop.metafields.beae.my-app.value.title}}`,
+                    code: `{{shop.metafields.ecomposer.my-app.value.title}}`,
                     preview: ''
                 }
             }
@@ -44,7 +44,7 @@ export default {
         javascript(){
             return function(){
                 const $el = this.$el;
-                const app_settings  = $el.querySelector('.beae-data');
+                const app_settings  = $el.querySelector('.ecomposer-data');
                 console.log(app_settings.innerHTML);
 
 
